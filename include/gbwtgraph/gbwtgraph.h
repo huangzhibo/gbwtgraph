@@ -43,7 +43,7 @@ namespace gbwtgraph
     1  The initial version.
 */
 
-class GBWTGraph : public PathHandleGraph, public SerializableHandleGraph, public NamedNodeBackTranslation
+class GBWTGraph : public PathHandleGraph, public SerializableHandleGraph, public NamedNodeBackTranslation, public PathPositionHandleGraph
 {
 public:
   GBWTGraph(); // Call (deserialize() and set_gbwt()) or simple_sds_load() before using the graph.
@@ -289,6 +289,42 @@ protected:
   /// we stopped early.
   virtual bool for_each_step_on_handle_impl(const handle_t& handle,
       const std::function<bool(const step_handle_t&)>& iteratee) const;
+
+//------------------------------------------------------------------------------
+
+/*
+  PathPositionHandleGraph interface.
+*/
+public:
+
+    /// Returns the length of a path measured in bases of sequence.
+    virtual size_t get_path_length(const path_handle_t& path_handle) const;
+
+    /// Returns the position along the path of the beginning of this step measured in
+    /// bases of sequence. In a circular path, positions start at the step returned by
+    /// path_begin().
+    virtual size_t get_position_of_step(const step_handle_t& step) const;
+
+    /// Returns the step at this position, measured in bases of sequence starting at
+    /// the step returned by path_begin(). If the position is past the end of the
+    /// path, returns path_end().
+    virtual step_handle_t get_step_at_position(const path_handle_t& path,
+                                               const size_t& position) const;
+
+protected:
+
+    /// Construct the index over path positions
+    void index_path_positions();
+
+    /// The "zero-point" of the offsets
+    /// TODO: really only needed for the mutable inheritor
+    unordered_map<path_handle_t, int64_t> min_path_offset;
+
+    /// Index of step by position
+    unordered_map<path_handle_t, map<int64_t, step_handle_t>> step_by_position;
+
+    /// Index of position by step
+    unordered_map<step_handle_t, int64_t> offset_by_step;
 
 //------------------------------------------------------------------------------
 

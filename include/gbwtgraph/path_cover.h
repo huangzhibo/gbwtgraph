@@ -14,7 +14,7 @@ namespace gbwtgraph
 
 //------------------------------------------------------------------------------
 
-constexpr size_t LOCAL_HAPLOTYPES_DEFAULT_N = 64;
+constexpr size_t LOCAL_HAPLOTYPES_DEFAULT_N = 12800;
 constexpr size_t PATH_COVER_DEFAULT_N       = 16;
 constexpr size_t PATH_COVER_DEFAULT_K       = 4;
 constexpr size_t PATH_COVER_MIN_K           = 2;

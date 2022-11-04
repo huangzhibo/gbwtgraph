@@ -1068,6 +1068,67 @@ GBWTGraph::for_each_step_on_handle_impl(const handle_t& handle,
 
 //------------------------------------------------------------------------------
 
+size_t GBWTGraph::get_path_length(const path_handle_t &path_handle) const {
+    const auto& path_step_by_position = step_by_position.at(path_handle);
+    auto last = path_step_by_position.rbegin();
+    if (last == path_step_by_position.rend()) {
+        return 0;
+    }
+    else {
+        return (last->first
+                + this->get_length(this->get_handle_of_step(last->second))
+                - min_path_offset.at(path_handle));
+    }
+
+//
+//    size_t length = 0;
+//    for (handle_t handle : this->scan_path(path_handle)) {
+//        length += this->get_length(handle);
+//    }
+//    return length;
+}
+
+
+size_t GBWTGraph::get_position_of_step(const step_handle_t &step) const {
+    return offset_by_step.at(step) - min_path_offset.at(get_path_handle_of_step(step));
+}
+
+
+step_handle_t GBWTGraph::get_step_at_position(const path_handle_t &path, const size_t &position) const {
+    int64_t lookup_position = position + min_path_offset.at(path);
+
+    const auto& path_step_by_position = step_by_position.at(path);
+    if (path_step_by_position.empty()) {
+        return this->path_end(path);
+    }
+
+    auto iter = --path_step_by_position.upper_bound(lookup_position);
+    if (lookup_position - iter->first >= this->get_length(this->get_handle_of_step(iter->second))) {
+        // this only occurs if the position was past the last base in the path
+        return this->path_end(path);
+    }
+    else {
+        return iter->second;
+    }
+}
+
+
+void GBWTGraph::index_path_positions() {
+    this->for_each_path_handle([&](const path_handle_t& path) {
+        int64_t offset = 0;
+        min_path_offset[path] = offset;
+        auto& path_step_by_position = step_by_position[path];
+        this->for_each_step_in_path(path, [&](const step_handle_t& step) {
+            offset_by_step[step] = offset;
+            path_step_by_position[offset] = step;
+            offset += this->get_length(this->get_handle_of_step(step));
+        });
+    });
+}
+
+
+//------------------------------------------------------------------------------
+
 PathSense
 GBWTGraph::get_sense(const path_handle_t& handle) const
 {
@@ -1802,6 +1863,7 @@ GBWTGraph::set_gbwt(const gbwt::GBWT& gbwt_index)
 
   this->reference_samples = parse_reference_samples_tag(*(this->index));
   this->cache_named_paths();
+  this->index_path_positions();
 }
 
 void
