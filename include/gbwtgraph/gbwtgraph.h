@@ -2,6 +2,7 @@
 #define GBWTGRAPH_GBWTGRAPH_H
 
 #include <vector>
+#include <map>
 
 #include <gbwt/cached_gbwt.h>
 
@@ -13,6 +14,7 @@
 
 namespace gbwtgraph
 {
+using namespace std;
 
 //------------------------------------------------------------------------------
 
@@ -43,7 +45,7 @@ namespace gbwtgraph
     1  The initial version.
 */
 
-class GBWTGraph : public PathHandleGraph, public SerializableHandleGraph, public NamedNodeBackTranslation, public PathPositionHandleGraph
+class GBWTGraph : public PathPositionHandleGraph, public SerializableHandleGraph, public NamedNodeBackTranslation
 {
 public:
   GBWTGraph(); // Call (deserialize() and set_gbwt()) or simple_sds_load() before using the graph.
@@ -311,10 +313,10 @@ public:
     virtual step_handle_t get_step_at_position(const path_handle_t& path,
                                                const size_t& position) const;
 
-protected:
-
     /// Construct the index over path positions
     void index_path_positions();
+
+protected:
 
     /// The "zero-point" of the offsets
     /// TODO: really only needed for the mutable inheritor

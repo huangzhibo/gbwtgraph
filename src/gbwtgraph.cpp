@@ -1114,6 +1114,12 @@ step_handle_t GBWTGraph::get_step_at_position(const path_handle_t &path, const s
 
 
 void GBWTGraph::index_path_positions() {
+    if(!step_by_position.empty())
+        step_by_position.clear();
+    if(!offset_by_step.empty())
+        offset_by_step.clear();
+    if(!min_path_offset.empty())
+        min_path_offset.clear();
     this->for_each_path_handle([&](const path_handle_t& path) {
         int64_t offset = 0;
         min_path_offset[path] = offset;
@@ -1863,7 +1869,7 @@ GBWTGraph::set_gbwt(const gbwt::GBWT& gbwt_index)
 
   this->reference_samples = parse_reference_samples_tag(*(this->index));
   this->cache_named_paths();
-  this->index_path_positions();
+//  this->index_path_positions();
 }
 
 void
